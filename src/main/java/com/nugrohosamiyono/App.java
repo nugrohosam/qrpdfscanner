@@ -22,13 +22,13 @@ public class App
         pdfFiles.add(new PdfScanner(Path.of(filePath)));
 
         String page = args[1];
-        int atPage = page.isEmpty() ? Integer.parseInt(page) : -1;
+        int atPage = !page.isEmpty() ? Integer.parseInt(page) : -1;
         
         ScanPdfsTask scanPdfsTask = new ScanPdfsTask();
         List<PdfScanResult> results = scanPdfsTask.scanPdfFiles(pdfFiles, atPage);
         
         results.forEach(
-            result -> System.out.println(result.getQrCode())
+            result -> System.out.println(result.getInputFilePath() + " => " + result.getQrCode())
         );
     }
 }

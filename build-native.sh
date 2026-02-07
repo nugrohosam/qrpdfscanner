@@ -67,11 +67,7 @@ elif [ "$PLATFORM" = "linux" ]; then
       --type app-image \
       --dest . \
       --vendor "QR PDF Scanner" \
-      --app-version 1.0 \
-      --linux-package-name qrscan \
-      --linux-menu-group "Utilities" \
-      --linux-shortcut \
-      --linux-app-category "Utility"
+      --app-version 1.0
 
     # Create wrapper
     cat > qrscan-native << 'EOF'

@@ -71,8 +71,7 @@ elif [ "$PLATFORM" = "linux" ]; then
       --linux-package-name qrscan \
       --linux-menu-group "Utilities" \
       --linux-shortcut \
-      --linux-app-category "Utility" \
-      -q
+      --linux-app-category "Utility"
 
     # Create wrapper
     cat > qrscan-native << 'EOF'

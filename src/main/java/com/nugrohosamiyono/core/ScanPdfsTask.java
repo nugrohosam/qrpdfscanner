@@ -1,6 +1,5 @@
 package com.nugrohosamiyono.core;
 
-import com.google.zxing.NotFoundException;
 import com.nugrohosamiyono.model.PdfScanResult;
 
 import java.io.IOException;
@@ -24,15 +23,23 @@ public class ScanPdfsTask {
         for (PdfScanner pdf : pdfFiles) {
 
             try {
-                String qrCode = pdf.getQRCode(atPage, false, false);
-                results.add(new PdfScanResult(pdf, PdfScanResult.ResultStatus.QR_CODE_FOUND, atPage, qrCode));
+                // Scan for multiple QR codes on the page
+                String[] qrCodes = pdf.scanMultipleQRCodes(atPage);
+
+                if (qrCodes.length > 0) {
+                    // QR codes found
+                    for (String qrCode : qrCodes) {
+                        results.add(new PdfScanResult(pdf, PdfScanResult.ResultStatus.QR_CODE_FOUND, atPage, qrCode));
+                    }
+                } else {
+                    // No QR codes found
+                    results.add(new PdfScanResult(pdf, PdfScanResult.ResultStatus.NO_QR_CODE, atPage, ""));
+                }
             } catch (IOException e) {
                 results.add(new PdfScanResult(pdf, PdfScanResult.ResultStatus.NO_FILE_ACCESS, atPage, ""));
-            } catch (NotFoundException e) {
-                results.add(new PdfScanResult(pdf, PdfScanResult.ResultStatus.NO_QR_CODE, atPage, ""));
             }
         }
-        
+
         return results;
     }
 }

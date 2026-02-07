@@ -1,1 +1,29 @@
-target
+# Maven
+target/
+*.jar
+*.class
+
+# Native apps
+QRScan.app/
+QRScan/
+*.exe
+qrscan-native
+qrscan-link
+
+# Build artifacts
+jpackage-input/
+*.dmg
+*.deb
+*.rpm
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db

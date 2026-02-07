@@ -3,6 +3,8 @@ package com.nugrohosamiyono.core;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.multi.GenericMultipleBarcodeReader;
+import com.google.zxing.multi.MultipleBarcodeReader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -275,5 +277,57 @@ public class PdfScanner {
         }
         // This should never happen, ever...
         return null;
+    }
+
+    /**
+     * Scans for and decodes multiple QR codes from page render image.
+     *
+     * @param pageIndex page to render
+     * @return List of QR codes that were decoded (comma-separated if found, empty string if none)
+     * @throws IOException if reading file failed or page doesn't exist
+     */
+    public String[] scanMultipleQRCodes(int pageIndex) throws IOException {
+        if (pageIndex > getNumberOfPages()) {
+            throw new IOException("Page does not exist!");
+        }
+
+        // Hints for scanning
+        Vector<BarcodeFormat> decodeFormat = new Vector<>();
+        decodeFormat.add(BarcodeFormat.QR_CODE);
+        Hashtable<DecodeHintType, Object> hintMap = new Hashtable<>();
+        hintMap.put(DecodeHintType.TRY_HARDER, true);
+        hintMap.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormat);
+
+        // Use MultipleBarcodeReader to detect multiple QR codes
+        MultiFormatReader formatReader = new MultiFormatReader();
+        formatReader.setHints(hintMap);
+        MultipleBarcodeReader multiReader = new GenericMultipleBarcodeReader(formatReader);
+
+        // We try for several images of the PDF page at several DPI settings
+        int[] dpiSettings = {150, 200, 250, 300};
+        for (int dpi : dpiSettings) {
+            try {
+                BufferedImage pageImage = getPageImage(pageIndex, dpi);
+                LuminanceSource source = new BufferedImageLuminanceSource(pageImage);
+                BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+                Result[] results = multiReader.decodeMultiple(bitmap, hintMap);
+
+                if (results.length > 0) {
+                    // Join all QR codes with comma separator
+                    String[] sb = new String[results.length];
+                    for (int i = 0; i < results.length; i++) {
+                        sb[i] = results[i].getText();
+                    }
+                    return sb;
+                }
+            } catch (NotFoundException e) {
+                // No QR codes found at this DPI, try next
+                continue;
+            }
+        }
+
+        // No QR codes found
+        return new String[0];
     }
 }
